@@ -5,7 +5,7 @@
 #define SUCCESS 0
 #define FAILURE -1
 
-
+//comment
 typedef uint8_t BYTE;
 typedef uint16_t WORD;
 typedef uint32_t DWORD;
