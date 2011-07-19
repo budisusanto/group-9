@@ -16,7 +16,7 @@ BITMAPFILEHEADER *pSrcFileHdr, *pTgtFileHdr;
 BITMAPINFOHEADER *pSrcInfoHdr, *pTgtInfoHdr;
 RGBQUAD *pSrcColorTable, *pTgtColorTable;
 unsigned char *pSrcFile, *pTgtFile, *pSrcData, *pTgtData;
-int srcFileSize, tgtFileSize;
+int srcFileSize = 0, tgtFileSize;
 
 unsigned char toCGC[256];
 unsigned char toPBC[256];
@@ -118,42 +118,6 @@ void displayFileInfo(char *pFileName,
         return;
 } // displayFileInfo
 
-// reads specified bitmap file from disk
-unsigned char *readFile(char *fileName, int *fileSize){
-        FILE *ptrFile;
-        unsigned char *pFile;
-        struct stat filebuf;
-
-        ptrFile = fopen(fileName, "rb");        // specify read only and binary (no CR/LF added)
-
-        if(ptrFile == NULL)
-        {
-                printf("Error in opening file: %s.\n\n", fileName);
-                return(NULL);
-        }
-
-        
-        // get file size
-        stat(fileName, &filebuf);
-        *fileSize = filebuf.st_size;
-        
-        //*fileSize = filelength(fileno(ptrFile));
-
-        // malloc memory to hold the file, include room for the header and color table
-        pFile = (unsigned char *) malloc(*fileSize);
-
-        if(pFile == NULL)
-        {
-                printf("Memory could not be allocated in readFile.\n\n");
-                return(NULL);
-        }
-
-        // Read in complete file
-        // buffer for data, size of each item, max # items, ptr to the file
-        fread(pFile, sizeof(unsigned char), *fileSize, ptrFile);
-        fclose(ptrFile);
-        return(pFile);
-} // readFile
 
 // writes modified bitmap file to disk
 // gMask used to determine the name of the file
@@ -267,11 +231,56 @@ int pow(int x, int y){
    return result;
 }*/
 
+// reads specified bitmap file from disk
+unsigned char *readFile(char *fileName, int *fileSize){
+        FILE *ptrFile;
+        unsigned char *pFile;
+	int fsize;
+        struct stat filebuf;
+
+        ptrFile = fopen(fileName, "rb");        // specify read only and binary (no CR/LF added)
+
+        if(ptrFile == NULL)
+        {
+                printf("Error in opening file: %s.\n\n", fileName);
+                return(NULL);
+        }
+
+        
+        // get file size
+        stat(fileName, &filebuf);
+        
+	fsize = filebuf.st_size;
+        *fileSize = fsize;
+
+	printf("file size variable: %d\n",fsize);
+	printf("file size pointer: %d\n",*fileSize);
+	        
+        //*fileSize = filelength(fileno(ptrFile));
+
+        // malloc memory to hold the file, include room for the header and color table
+        pFile = (unsigned char *) malloc(*fileSize);
+
+        if(pFile == NULL)
+        {
+                printf("Memory could not be allocated in readFile.\n\n");
+                return(NULL);
+        }
+
+        // Read in complete file
+        // buffer for data, size of each item, max # items, ptr to the file
+        fread(pFile, sizeof(unsigned char), *fileSize, ptrFile);
+        fclose(ptrFile);
+        return(pFile);
+} // readFile
+
 
 // Main function in LSB Steg
 // Parameters are used to indicate the input file and available options
 int main(int argc, char *argv[]){
         int x;
+	char *pp;
+	int *srcsize;	
 
         if(argc < 3 || argc > 4)
         {
@@ -311,6 +320,16 @@ int main(int argc, char *argv[]){
         // file header indicates where image data begins
         pSrcData = pSrcFile + pSrcFileHdr->bfOffBits;
 
+	pp = (char *) &(pSrcFileHdr->bfType);
+	printf("File Type: %c%c\n", *pp, *(pp+1) );
+	
+	srcsize = (int *) &(pSrcFileHdr->bfSize);
+	printf("File Size: %d\n", srcFileSize);
+
+
+
+
+/*
         // for debugging purposes, show file info on the screen
         displayFileInfo(argv[1], pSrcFileHdr, pSrcInfoHdr, pSrcColorTable, pSrcData);
 
@@ -365,6 +384,9 @@ int main(int argc, char *argv[]){
 
         // write the file to disk
         x = writeFile(pTgtFile, pTgtFileHdr->bfSize, argv[2]);
+
+
+*/
 
         return 0;
 } // main
