@@ -10,6 +10,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+//3D array to store bit slices
+unsigned char bitslices[8][8][8];
 
 // Global Variables for File Data Pointers
 BITMAPFILEHEADER *pSrcFileHdr, *pTgtFileHdr;
@@ -23,6 +25,46 @@ unsigned char toPBC[256];
 
 // default values
 unsigned char gNumLSB = 1, gMask = 0xfe, gShift = 7;
+
+//gets the bit at the location 'bitloc'(0-7) from a byte
+unsigned char getBit(unsigned char byte, int bitloc){
+   unsigned char ret;
+
+   switch(bitloc){
+	   case 0:
+		   ret = (byte & 0x80)>>7;break;
+	   case 1:
+		   ret = (byte & 0x40)>>6;break;
+	   case 2:
+		   ret = (byte & 0x20)>>5;break;
+	   case 3:
+		   ret = (byte & 0x10)>>4;break;
+	   case 4:
+		   ret = (byte & 0x08)>>3;break;
+	   case 5:
+		   ret = (byte & 0x04)>>2;break;
+	   case 6:
+		   ret = (byte & 0x02)>>1;break;
+	   case 7:
+		   ret = byte & 0x01;break;
+	   default:
+		   break;
+   }
+   return ret;
+}
+
+//slices the bit planes of an 8x8 pixel block
+void getbitplanes(unsigned char matrix[8][8]){
+   int x, y, z;
+   for(x=0;x<8;x++){
+      for(y=0;y<8;y++){
+         for(z=0;z<8;z++){
+            cube[x][y][z] = getBit(matrix[x][y],z);
+         }
+      }
+   }
+}
+
 
 // this function builds the canonical gray code array variables
 void buildGrayCode(){
