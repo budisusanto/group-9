@@ -24,8 +24,8 @@ typedef uint32_t LONG;
 // this structure defines the file header format for a bitmap file
 typedef struct tagBITMAPFILEHEADER // (14 bytes)
 {
-        WORD    bfType;                                 // ASCII "BM"
-        DWORD   bfSize;                                 // total length of bitmap file
+        uint16_t    bfType;                                 // ASCII "BM"
+        uint32_t   bfSize;                                 // total length of bitmap file
         WORD    bfReserved1;                    // reserved
         WORD    bfReserved2;                    // reserved
         DWORD   bfOffBits;                              // offset to start of actual pixel data
