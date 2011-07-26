@@ -92,7 +92,7 @@ void getbitplanes(unsigned char matrix[8][8]){
    for(x=0;x<8;x++){
       for(y=0;y<8;y++){
          for(z=0;z<8;z++){
-            cube[x][y][z] = getBit(matrix[x][y],z);
+            bitslices[x][y][z] = getBit(matrix[x][y],z);
          }
       }
    }
