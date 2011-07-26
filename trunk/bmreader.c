@@ -399,7 +399,7 @@ int main(int argc, char *argv[]){
 	printf("File Type: %c%c\n", *pp, *(pp+1) );
 	
 	srcsize = (int *) &(pSrcFileHdr->bfSize);
-	printf("File Size: %d\n", srcFileSize);
+	printf("File Size: %d\n", *srcsize);
 
 
 
