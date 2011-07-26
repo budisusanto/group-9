@@ -1,5 +1,5 @@
-// Bitmap Reader
-//
+
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,6 +13,17 @@
 //3D array to store bit slices
 unsigned char bitslices[8][8][8];
 
+// 8x8 checker board matrix
+unsigned char checker[8][8] =
+	{{0,1,0,1,0,1,0,1},
+         {1,0,1,0,1,0,1,0},
+         {0,1,0,1,0,1,0,1},
+         {1,0,1,0,1,0,1,0},
+         {0,1,0,1,0,1,0,1},
+         {1,0,1,0,1,0,1,0},
+         {0,1,0,1,0,1,0,1},
+         {1,0,1,0,1,0,1,0}};
+
 // Global Variables for File Data Pointers
 BITMAPFILEHEADER *pSrcFileHdr, *pTgtFileHdr;
 BITMAPINFOHEADER *pSrcInfoHdr, *pTgtInfoHdr;
@@ -25,6 +36,28 @@ unsigned char toPBC[256];
 
 // default values
 unsigned char gNumLSB = 1, gMask = 0xfe, gShift = 7;
+
+// sets bit indicator on a 8x8 matrix
+// at the bottom left bit, 1 if exists conjugation
+// 0 otherwise
+void set_indicator_to(int x, unsigned char matrix[8][8]){
+   if(x==1||x==0)
+      matrix[0][7] = x;
+}
+
+// xor's an uncomplex matrix with a checker board matrix
+// to make it complex and sets bit indicator to 1
+void conjugate(unsigned char ncomp[8][8]){
+   int i, j;
+   for(i=0;i<8;i++){
+      for(j=0;j<8;j++){
+         ncomp[i][j] = checker[i][j] ^ ncomp[i][j];
+      }
+   }
+   set_indicator_to(1,ncomp);
+}
+
+
 
 //gets the bit at the location 'bitloc'(0-7) from a byte
 unsigned char getBit(unsigned char byte, int bitloc){
