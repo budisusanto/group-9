@@ -291,21 +291,6 @@ printf("color %d == color %d\n", last,cnt);
         return(pDstFile);
 } // scramble
 
-/*
-int pow(int x, int y){
-   if(y==0)
-      return 1;
-
-   int i, result;
-   result = x;
-
-   for(i=1;i<y;i++){
-      result *= x;
-   }
-
-   return result;
-}*/
-
 // reads specified bitmap file from disk
 unsigned char *readFile(char *fileName, int *fileSize){
         FILE *ptrFile;
@@ -365,6 +350,19 @@ int main(int argc, char *argv[]){
 
         // initialize gray code conversion table
         buildGrayCode();
+	int i, j;
+	char binary[9]; 
+	binary[8] = '\0';
+        for(i=0;i<256;i++){
+	   for(j=0;j<8;j++){
+	      binary[j] = getBit(toCGC[i], j)+48;
+	   } 
+	      printf("%s\n", binary);
+
+	}
+	return 0;  // comment this out if you want to test further
+		   // this is just to test the CGC builder
+
 
         // get the number of bits to use for data hiding or data extracting
         // if not specified, default to one
@@ -404,7 +402,7 @@ int main(int argc, char *argv[]){
 
 
 
-/*
+
         // for debugging purposes, show file info on the screen
         displayFileInfo(argv[1], pSrcFileHdr, pSrcInfoHdr, pSrcColorTable, pSrcData);
 
@@ -461,7 +459,7 @@ int main(int argc, char *argv[]){
         x = writeFile(pTgtFile, pTgtFileHdr->bfSize, argv[2]);
 
 
-*/
+
 
         return 0;
 } // main
