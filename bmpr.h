@@ -4,7 +4,7 @@
 
 #define SUCCESS 0
 #define FAILURE -1
-
+#pragma pack(1)
 //comment
 typedef uint8_t BYTE;
 typedef uint16_t WORD;
@@ -24,11 +24,11 @@ typedef uint32_t LONG;
 // this structure defines the file header format for a bitmap file
 typedef struct tagBITMAPFILEHEADER // (14 bytes)
 {
-        uint16_t    bfType;                                 // ASCII "BM"
-        uint32_t   bfSize;                                 // total length of bitmap file
-        WORD    bfReserved1;                    // reserved
-        WORD    bfReserved2;                    // reserved
-        DWORD   bfOffBits;                              // offset to start of actual pixel data
+        WORD bfType;                                 // ASCII "BM"
+        DWORD bfSize;                                 // total length of bitmap file
+        WORD bfReserved1;                    // reserved
+        WORD bfReserved2;                    // reserved
+        DWORD bfOffBits;                              // offset to start of actual pixel data
 } BITMAPFILEHEADER;
 
 // this structure defines the header which describes the bitmap itself

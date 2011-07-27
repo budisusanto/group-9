@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 	FILE * pFile;
 	BITMAPFILEHEADER bmpFileHdr;
 	BITMAPINFOHEADER bmpInfoHdr;
-	char *string;
+	unsigned char *string;
 	char *point;
 	unsigned char *bitmapImage;
 	
@@ -111,16 +111,12 @@ int main(int argc, char *argv[]) {
 
 
 	string = (char *) &(bmpFileHdr.bfType);
-	printf("File Type: %c%c%c%c%c%c\n", *string, *(string+1), *(string+2),
-				*(string+3), *(string+4), *(string+5));
+	printf("File Type: %c%c\n", *string, *(string+1));
 	printf("File Size: %d\n", bmpFileHdr.bfSize);
-	
 	printf("offBits: %d\n", bmpFileHdr.bfOffBits);
-	
-	printf ("Byte 0: %x\n", bmpFileHdr.bfSize);
-	printf ("Byte 1: %x\n", bmpFileHdr.bfSize);
-	printf ("Byte 2: %x\n", bmpFileHdr.bfSize);
-	printf ("Byte 3: %x\n", bmpFileHdr.bfSize);
+
+	printf("size of header: %d\nwidth: %d\nheight: %d\nplanes: %d\n\n",
+		       	bmpInfoHdr.biSize,bmpInfoHdr.biWidth,bmpInfoHdr.biHeight,bmpInfoHdr.biPlanes);
 
 /*	bmpFileHdr = (BITMAPFILEHEADER *)dataArray;
 	string = (char *) &(bmpFileHdr->bfType);
