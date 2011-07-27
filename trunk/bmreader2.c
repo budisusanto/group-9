@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 	FILE * pFile;
 	BITMAPFILEHEADER bmpFileHdr;
 	BITMAPINFOHEADER bmpInfoHdr;
-	unsigned char *string;
+	char *string;
 	char *point;
 	unsigned char *bitmapImage;
 	
