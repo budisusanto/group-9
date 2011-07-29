@@ -3,11 +3,13 @@
 #include "bmpr.h"
 
 unsigned char matrix[8][8];
+int add = 0;
+
 //reads cover image, returns the number of pixels left in the image
 //select color to be used for hidding 'r' for red, 'g' for green, 'b' for blue
 int readCover(FILE *pFile, int pixread, int width, char rgb){
    RGB color;
-   int level, i;
+   int level, i, offset;
    
    for(level=0;level<8;level++){
       for(i=0;i<8;i++){
@@ -29,8 +31,11 @@ int readCover(FILE *pFile, int pixread, int width, char rgb){
          fseek(pFile, (sizeof(RGB)*(width - 8)), SEEK_CUR);
    }
    pixread+=64;
-   if((pixread % (width*8))!=0)
-      fseek(pFile, (54 + (sizeof(RGB)*(pixread/8))), SEEK_SET);
+   offset = (54 + (sizeof(RGB)*(pixread/8)));
+   if((pixread % (width*8))==0){
+      add += sizeof(RGB) * width * 7;
+   }
+   fseek(pFile, (offset+add), SEEK_SET);
    return pixread;
 }
 
@@ -63,7 +68,10 @@ int main(int argc, char *argv[]) {
        int totalpix = bmpInfoHdr.biWidth * bmpInfoHdr.biHeight;
        int pixread=0;
 
-       while(pixread<totalpix){
+       while(pixread < totalpix){
+   //change this value ^
+   //to store the block in the matrix
+   //to get block "n" multiply n*64
           pixread = readCover(pFile,pixread,bmpInfoHdr.biWidth,'b');
        }
        for(i=0;i<8;i++){
@@ -72,7 +80,7 @@ int main(int argc, char *argv[]) {
 	  }
           printf("\n");
        }
-       printf("pixels left: %d\n",(totalpix-pixread));
+       printf("block #%d\npixels left: %d\n",(pixread/64),(totalpix-pixread));
 
         return 0;
 }
