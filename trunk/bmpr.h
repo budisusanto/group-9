@@ -47,12 +47,11 @@ typedef struct tagBITMAPINFOHEADER // (40 bytes)
         DWORD      biClrImportant;              // important colors actualy used (normally zero)
 } BITMAPINFOHEADER;     
 
-typedef struct tagRGBQUAD
+typedef struct tagRGB
 {
-        BYTE    rgbBlue;
-        BYTE    rgbGreen;
-        BYTE    rgbRed;
-        BYTE    rgbReserved;
-} RGBQUAD;
+        BYTE    Blue;
+        BYTE    Green;
+        BYTE    Red;
+} RGB;
 
 //*/
