@@ -113,33 +113,26 @@ int main(int argc, char *argv[]) {
 	buildGrayCode();
 	pixread = 0;
 r=0;
-   while(pixread < totalpix)	{
+
+	fflush(stdout);
+	while(pixread < totalpix){
+	
 	   //change this value ^
 		//to store the block in the matrix
 	   //to get block "n" multiply n*64
 		pixread = readCover(pFile,pixread,bmpInfoHdr.biWidth);
-	
-	if( r == 0) {	
-		for(i=0;i<8;i++) {
-			for(j=0;j<8;j++) {
-				printf("%d ",matrixB[i][j]);
-  		   }
-			printf("\n");
-		}
-	}
-	
-		for(i=0;i<8;i++)
-		{
-			for(j=0;j<8;j++)
-			{
+		/*
+		for(i=0;i<8;i++){
+			for(j=0;j<8;j++){
 				matrixB[i][j] = toCGC[matrixB[i][j]];
-  		   }
+			}
   		}
-	/*	
+		
   		numBytes = fread(&secretImageArray, 1, 7, pSecretFile);
   		//printf("read secret bytes: %d\n",numBytes);
   		
 		getbitplanes();
+		
 		for(bitplane = 0; bitplane <8; bitplane++)
 		{
   			if (calc_complex(bitslices, bitplane) >= THRESHOLD)
@@ -168,59 +161,26 @@ r=0;
 		  		}
   			}
 		}
-		*/
+		
 		for(i=0;i<8;i++)
 		{
 			for(j=0;j<8;j++)
 			{
 				matrixB[i][j] = toPBC[matrixB[i][j]];
-  		   }
+			}
   		}
-  		
-	if(r ==0)
-	{
-		
-			printf("\n");
-		
-			for(i=0;i<8;i++) {
-			for(j=0;j<8;j++) {
-				printf("%d ",matrixB[i][j]);
-  		   }
-			printf("\n");
-		}
-	}
-	r++;
+		*/
 		pixwritten = writeOutFile(pOutFile, pixread, bmpInfoHdr.biWidth);
+		
 		//r++;
 		//if( r == 5);
 		//	break;
 	}
 	
+	
+	
+	printf("block #%d\npixels left: %d\n",(pixread/64),(totalpix-pixread));
 	exit(0);
-	for(i=0;i<8;i++) {
-		for(j=0;j<8;j++) {
-			printf("%d ", matrixB[i][j]);
-		}
-
-      printf("\n");
-	}
-   printf("block #%d\npixels left: %d\n",(pixread/64),(totalpix-pixread));
-
-	
-   printf("CGC values:\n");
-
-	for(z=0;z<8;z++){
-	   for(x=0;x<8;x++){
-	      for(y=0;y<8;y++){
-	         //printf("%d ", bitslices[x][y][z]);
-	      }
-	      //printf("\n");
-      }
-      //printf("complexity: %f\n",calc_complex(bitslices, z));
-   }
-	
-
-   return 0;
 }
 
 //reads cover image, returns the number of pixels left in the image
@@ -258,10 +218,10 @@ int writeOutFile(FILE *pFile, int pixwritten, int width){
    
    for(level=0;level<8;level++) {
       for(i=0;i<8;i++) {
+         fwrite(&matrixB[level][i], 1, 1, pFile);
          fwrite(&matrixG[level][i], 1, 1, pFile);
          fwrite(&matrixR[level][i], 1, 1, pFile);
-         fwrite(&matrixB[level][i], 1, 1, pFile);
-		}
+      }
       fseek(pFile, (3* (width - 8)), SEEK_CUR);
    }
    regions++;
@@ -285,7 +245,7 @@ int writeOutFile2(FILE *pFile, int pixwritten, int width){
          fwrite(&matrixG[level][i], 1, 1, pFile);
          fwrite(&matrixR[level][i], 1, 1, pFile);
 		}
-      if(level<7) 
+      
          fseek(pFile, (3*(width - 8)), SEEK_CUR);
    }
    pixwritten += 64;
