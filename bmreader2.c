@@ -86,6 +86,7 @@ int main(int argc, char *argv[]) {
 	if (dataArray == NULL) { fprintf(stderr,"malloc error\n"); exit(1); }
 	
 	//http://www.vbforums.com/showthread.php?t=261522
+	//http://www.brackeen.com/vga/source/bc31/bitmap.c.html
 	
 	pFile = fopen(fileName,"rb");
 	if (pFile == NULL) { fprintf(stderr,"fopen error\n"); exit(1); }
@@ -93,7 +94,7 @@ int main(int argc, char *argv[]) {
 //	result = fread(dataArray, 1, fsize, pFile);
 	//if (result != fsize) { fprintf(stderr,"fread error\n"); exit(1); }
 	
-	fread(&bmpFileHdr, 1, sizeof(BITMAPFILEHEADER), pFile);
+	fread(&bmpFileHdr, 1, sizeof(struct tagBITMAPFILEHEADER), pFile);
 	if (bmpFileHdr.bfType != 0x4D42) {
 //		fclose(filePtr);
 		fprintf(stderr,"Not BM\n");
