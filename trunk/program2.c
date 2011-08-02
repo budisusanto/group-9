@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 	BITMAPFILEHEADER bmpFileHdr;
 	BITMAPINFOHEADER bmpInfoHdr;
 	int i, j, pixread, pixwritten, totalpix, x, y, z;
-	int bit, numBytes, bitplane;
+	int bit, numBytes, bitplane, r;
 	
 	printf("file name: %s\n",fileName);
 	printf("secret file name: %s\n",secretFileName);
@@ -112,34 +112,12 @@ int main(int argc, char *argv[]) {
 	
 	buildGrayCode();
 	pixread = 0;
-
+r=0;
    while(pixread < totalpix)	{
 	   //change this value ^
 		//to store the block in the matrix
 	   //to get block "n" multiply n*64
 		pixread = readCover(pFile,pixread,bmpInfoHdr.biWidth);
-		
-		printf("blue array\n");
-		for(i=0;i<8;i++) {
-			for(j=0;j<8;j++) {
-				printf("%d ", matrixB[i][j]);
-			}
-   	   printf("\n");
-		}
-		printf("green array\n");
-		for(i=0;i<8;i++) {
-			for(j=0;j<8;j++) {
-				printf("%d ", matrixG[i][j]);
-			}
-   	   printf("\n");
-		}
-		printf("red array\n");
-		for(i=0;i<8;i++) {
-			for(j=0;j<8;j++) {
-				printf("%d ", matrixR[i][j]);
-			}
-   	   printf("\n");
-		}
 		
 		
 		for(i=0;i<8;i++)
@@ -190,30 +168,12 @@ int main(int argc, char *argv[]) {
   		   }
   		}
   		
-		pixwritten = writeOutFile(pOutFile, pixwritten, bmpInfoHdr.biWidth);
-		break;
+		pixwritten = writeOutFile(pOutFile, pixread, bmpInfoHdr.biWidth);
+		//r++;
+		//if( r == 5);
+		//	break;
 	}
-	printf("blue array\n");
-		for(i=0;i<8;i++) {
-			for(j=0;j<8;j++) {
-				printf("%d ", matrixB[i][j]);
-			}
-   	   printf("\n");
-		}
-		printf("green array\n");
-		for(i=0;i<8;i++) {
-			for(j=0;j<8;j++) {
-				printf("%d ", matrixG[i][j]);
-			}
-   	   printf("\n");
-		}
-		printf("red array\n");
-		for(i=0;i<8;i++) {
-			for(j=0;j<8;j++) {
-				printf("%d ", matrixR[i][j]);
-			}
-   	   printf("\n");
-		}
+	
 	exit(0);
 	for(i=0;i<8;i++) {
 		for(j=0;j<8;j++) {
@@ -250,9 +210,9 @@ int readCover(FILE *pFile, int pixread, int width){
    for(level=0;level<8;level++) {
       for(i=0;i<8;i++) {
          fread(&color, 1, sizeof(RGB), pFile);
-			matrixB[level][i] = color.Blue;
-			matrixG[level][i] = color.Green;
 			matrixR[level][i] = color.Red;
+			matrixG[level][i] = color.Green;
+			matrixB[level][i] = color.Blue;
 		}
       if(level<7) 
          fseek(pFile, (sizeof(RGB)*(width - 8)), SEEK_CUR);
@@ -268,6 +228,33 @@ int readCover(FILE *pFile, int pixread, int width){
 
 int writeOutFile(FILE *pFile, int pixwritten, int width){
    RGB color;
+   int level, i, offset, add2;
+   static int regions = 0;
+   int regionsPerWidth;
+   
+   regionsPerWidth = width / 8;
+   
+   for(level=0;level<8;level++) {
+      for(i=0;i<8;i++) {
+         fwrite(&matrixG[level][i], 1, 1, pFile);
+         fwrite(&matrixR[level][i], 1, 1, pFile);
+         fwrite(&matrixB[level][i], 1, 1, pFile);
+		}
+      fseek(pFile, (3* (width - 8)), SEEK_CUR);
+   }
+   regions++;
+   offset = (54 + (regions * 24));
+    if((regions % regionsPerWidth) == 0){
+    	printf("hit border\n");
+    //	exit(0);
+      add2 += (7 * 3 * width );
+   }
+   fseek(pFile, (offset+add2), SEEK_SET);
+   return pixwritten;
+}
+
+int writeOutFile2(FILE *pFile, int pixwritten, int width){
+   RGB color;
    int level, i, offset;
    
    for(level=0;level<8;level++) {
@@ -277,7 +264,7 @@ int writeOutFile(FILE *pFile, int pixwritten, int width){
          fwrite(&matrixR[level][i], 1, 1, pFile);
 		}
       if(level<7) 
-         fseek(pFile, (sizeof(RGB)*(width - 8)), SEEK_CUR);
+         fseek(pFile, (3*(width - 8)), SEEK_CUR);
    }
    pixwritten += 64;
    offset = (54 + ( sizeof(RGB) * (pixwritten/8)) );
