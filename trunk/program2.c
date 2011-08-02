@@ -118,8 +118,16 @@ r=0;
 		//to store the block in the matrix
 	   //to get block "n" multiply n*64
 		pixread = readCover(pFile,pixread,bmpInfoHdr.biWidth);
-		
-		
+	
+	if( r == 0) {	
+		for(i=0;i<8;i++) {
+			for(j=0;j<8;j++) {
+				printf("%d ",matrixB[i][j]);
+  		   }
+			printf("\n");
+		}
+	}
+	
 		for(i=0;i<8;i++)
 		{
 			for(j=0;j<8;j++)
@@ -127,7 +135,7 @@ r=0;
 				matrixB[i][j] = toCGC[matrixB[i][j]];
   		   }
   		}
-  		
+	/*	
   		numBytes = fread(&secretImageArray, 1, 7, pSecretFile);
   		//printf("read secret bytes: %d\n",numBytes);
   		
@@ -160,6 +168,7 @@ r=0;
 		  		}
   			}
 		}
+		*/
 		for(i=0;i<8;i++)
 		{
 			for(j=0;j<8;j++)
@@ -168,6 +177,19 @@ r=0;
   		   }
   		}
   		
+	if(r ==0)
+	{
+		
+			printf("\n");
+		
+			for(i=0;i<8;i++) {
+			for(j=0;j<8;j++) {
+				printf("%d ",matrixB[i][j]);
+  		   }
+			printf("\n");
+		}
+	}
+	r++;
 		pixwritten = writeOutFile(pOutFile, pixread, bmpInfoHdr.biWidth);
 		//r++;
 		//if( r == 5);
@@ -245,7 +267,7 @@ int writeOutFile(FILE *pFile, int pixwritten, int width){
    regions++;
    offset = (54 + (regions * 24));
     if((regions % regionsPerWidth) == 0){
-    	printf("hit border\n");
+   // 	printf("hit border\n");
     //	exit(0);
       add2 += (7 * 3 * width );
    }
