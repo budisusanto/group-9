@@ -51,12 +51,16 @@ int main(int argc, char *argv[]){
 		exit(0);
 	}
 	
+	// set character to 'e' for extract or 'h' for hiding
 	mode = argv[1][0];
+	
+	// set character to 'r', 'g', or 'b' for which color to use
 	color = argv[2][0];
 
 	sigbits = 8; 			// Choose number of significant bits
 	
 	if(argc==5){
+	// extraction mode
 		if((mode=='e')&&(color=='r'||color=='g'||color=='b')){
 			char *fileName = argv[3]; 
 			char *outFileName = argv[4];
@@ -87,16 +91,23 @@ int main(int argc, char *argv[]){
 			//read info header
 			fread(&bmpInfoHdr, 1, sizeof(BITMAPINFOHEADER), pFile);
 			
+			// total pixels in the stego-image, width x height
 			totalpix = bmpInfoHdr.biWidth * bmpInfoHdr.biHeight;
 			printf("number of pixels in stego file: %d\n",totalpix);
 		
+			// build the toCGC and toPBC arrays
 			buildGrayCode();
 			
+			// allocate pixel array of RGB structures 
+			// RGB structures contain the 3 bytes (24-bits) of each pixel
+			// assign pointer to the array, which is used to access pixel data
 			pixel = (RGB *)calloc(totalpix, sizeof(RGB));
 
+			//read in all pixels to allocated memory, in order of the BMP data
 			for(i=0;i<totalpix;i++) {
 				fread(&pixel[i], 1, sizeof(RGB), pFile);
 			}
+			
 			int width = bmpInfoHdr.biWidth;
 			int bottom, pixleft, sfilesize, bwritten, first;
 			pixleft = totalpix;
@@ -105,29 +116,51 @@ int main(int argc, char *argv[]){
 			bwritten = 0;
 			sfilesize = 1;
 			
+			// main loop used for extraction, processes until all pixels in stego-image
+			// have been processed
 			while(pixleft>0){
+				
+				// loads next 8x8 region into matrix
+				// returns bottom of next 8x8 region to be processed
 				bottom = readStego(pixel, width, bottom);
+				
+				// convert PBC values to CGC
 				for(i=0;i<8;i++){
 					for(j=0;j<8;j++){
 						matrix[i][j] = toCGC[matrix[i][j]];
 					}
 				}
-						
+				
+				// slice current 8x8 region into global bitslices array
 				getbitplanes();
-							
+				
+
+				// process as many bit planes as desired for the current region
 				for(bitplane = 8-sigbits; bitplane < 8; bitplane++){
+					
 					if (calc_complex(bitslices, bitplane) >= THRESHOLD){
+					// if current bitplane of the current region is complex past the threshold
+					// extract data
 					
 						if(readIndicator(bitplane)==1){
+							// if conjugation indicator is set
+							// conjugate to get original data
 							conjugate(bitslices, bitplane);
 						}
+						
+						// load current bitplane into secret matrix for processing
 						for(x=0;x<7;x++){
 							for(y=0;y<8;y++){
 								secret[x][y] = bitslices[x][y][bitplane];
 							}
 						}
+						
+						// puts bits from secret into bytes
 						getSecretBytes();
+						
 						if(first == 1){
+							// if first block, header for bitmap
+							// gives filesize of secret image
 							printf("type of secret file: %c%c\n",secretImageArray[0], secretImageArray[1]);
 							sfilesize = (secretImageArray[5] << 24)+ (secretImageArray[4] << 16)+ (secretImageArray[3]<<8)+secretImageArray[2];
 							printf("size of secret file: %d bytes\n",sfilesize);
@@ -135,15 +168,19 @@ int main(int argc, char *argv[]){
 						}
 				
 						for(i=0;i < 7;i++){
+							// write to output file if secret file size has not been met
 							if(!(bwritten<sfilesize))
 								break;
 							bwritten += fwrite(&secretImageArray[i], 1, 1, pOutFile);
 						}
 					}
 				}
-	
+				
+				//exit loop if secret file size has been reached
 				if(bwritten==sfilesize)
 					break;
+					
+				// have processed 64 pixels (8x8 region)
 				pixleft -= 64;
 			}
 			
@@ -158,6 +195,8 @@ int main(int argc, char *argv[]){
 		}
 	}
 	if(argc==6){
+	// hiding mode
+	// most of algorithm is the same as extraction
 		if((mode=='h')&&(color=='r'||color=='g'||color=='b')){
 			char *fileName = argv[3]; 
 			char *secretFileName = argv[4];
@@ -284,9 +323,14 @@ int main(int argc, char *argv[]){
 	exit(0);
 }
 
+// loads next 8x8 region into matrix for processing
+// uses width to determine how many bytes to skip to reach next row
+// uses bottom to keep track of where the bottom of current region is
+// used only for hiding
 void readCover(RGB *pixel, int width, int bottom){
 	int top, i, j, k;
 		
+	// calculates 8 rows above the bottom
 	top = bottom+(width*7)+8;
 	k = 0;
 
@@ -304,6 +348,9 @@ void readCover(RGB *pixel, int width, int bottom){
 
 }
 
+// loads working matrix values into actual pixel array
+// uses bottom to set where next region bottom is
+// used only for hiding
 int writeOut(RGB *pixel, int width, int bottom){
 	int top, i, j, k;
 	static int pixread = 0;	
@@ -329,6 +376,10 @@ int writeOut(RGB *pixel, int width, int bottom){
 	return bottom;
 }
 
+
+// used only for extraction
+// reads through stego-file
+// loads 8x8 regions from stego-file into matrix for use
 int readStego(RGB *pixel, int width, int bottom){
 	int top, i, j, k;
 	static int pixread = 0;	
@@ -348,6 +399,8 @@ int readStego(RGB *pixel, int width, int bottom){
 	}
 	pixread += 64;
 	bottom += 8;
+	
+	// jumps to next row when end is reached
 	if((pixread % (width * 8)) == 0){
 		bottom += (width * 7);
 	}
