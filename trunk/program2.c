@@ -11,8 +11,8 @@ unsigned char secmatrix[8][8];
 unsigned char bitslices[8][8][8];	//3D array to store bit slices
 unsigned char secret[7][8];			// array to store bits of secret data
 int add=0,add2=0;
-static unsigned int count = 0;
 char color, mode;
+int sigbits;
 
 unsigned char checker[8][8] =		// 8x8 checker board matrix
 	{{0,1,0,1,0,1,0,1},
@@ -53,6 +53,8 @@ int main(int argc, char *argv[]){
 	
 	mode = argv[1][0];
 	color = argv[2][0];
+
+	sigbits = 8; 			// Choose number of significant bits
 	
 	if(argc==5){
 		if((mode=='e')&&(color=='r'||color=='g'||color=='b')){
@@ -62,7 +64,7 @@ int main(int argc, char *argv[]){
 			BITMAPFILEHEADER bmpFileHdr;
 			BITMAPINFOHEADER bmpInfoHdr;
 			int i, j, totalpix, x, y;
-			int numBytes, bitplane;
+			int bitplane;
 			RGB *pixel;
 			
 			printf("stego-file name: %s\n",fileName);
@@ -113,9 +115,9 @@ int main(int argc, char *argv[]){
 						
 				getbitplanes();
 							
-				for(bitplane = 0; bitplane < 8; bitplane++){
+				for(bitplane = 8-sigbits; bitplane < 8; bitplane++){
 					if (calc_complex(bitslices, bitplane) >= THRESHOLD){
-						count ++;
+					
 						if(readIndicator(bitplane)==1){
 							conjugate(bitslices, bitplane);
 						}
@@ -132,7 +134,9 @@ int main(int argc, char *argv[]){
 							first = 0;
 						}
 				
-						for(i=0;(i < 7)&&(bwritten<sfilesize);i++){
+						for(i=0;i < 7;i++){
+							if(!(bwritten<sfilesize))
+								break;
 							bwritten += fwrite(&secretImageArray[i], 1, 1, pOutFile);
 						}
 					}
@@ -162,7 +166,8 @@ int main(int argc, char *argv[]){
 			BITMAPFILEHEADER bmpFileHdr;
 			BITMAPINFOHEADER bmpInfoHdr;
 			int i, j, totalpix, x, y;
-			int numBytes, bitplane;
+			int bitplane;
+			
 			RGB *pixel;
 		
 			printf("cover file name: %s\n",fileName);
@@ -224,27 +229,28 @@ int main(int argc, char *argv[]){
 						matrix[i][j] = toCGC[matrix[i][j]];
 					}
 				}
-				numBytes = fread(&secretImageArray, 1, 7, pSecretFile);
-				getSecretBits();
+
 				getbitplanes();
 						
-				for(bitplane = 0; (bitplane < 8) && (numBytes > 0); bitplane++){
+				for(bitplane = 8-sigbits; bitplane < 8 ; bitplane++){
 					if (calc_complex(bitslices, bitplane) >= THRESHOLD){
-						count ++;
+				
+					 
+						fread(&secretImageArray, 1, 7, pSecretFile);
 					
+						getSecretBits();
 						for(x=0;x<7;x++){
 							for(y=0;y<8;y++){
 								bitslices[x][y][bitplane] = secret[x][y];
 							}
-						//	count ++;
+					
 						}
 						if( calc_complex(bitslices,bitplane) < THRESHOLD ){
 							conjugate(bitslices, bitplane);
 						}else{
 							set_indicator_to(0, bitplane);
 						}
-						numBytes = fread(&secretImageArray, 1, 7, pSecretFile);
-						getSecretBits();
+
 					}
 				}
 
