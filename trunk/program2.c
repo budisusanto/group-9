@@ -236,8 +236,9 @@ int main(int argc, char *argv[]){
 							for(y=0;y<8;y++){
 								bitslices[x][y][bitplane] = secret[x][y];
 							}
+						//	count ++;
 						}
-						if(calc_complex(bitslices,bitplane) < THRESHOLD ){
+						if( calc_complex(bitslices,bitplane) < THRESHOLD ){
 							conjugate(bitslices, bitplane);
 						}else{
 							set_indicator_to(0, bitplane);
@@ -267,12 +268,13 @@ int main(int argc, char *argv[]){
 			fclose(pOutFile);
 			fclose(pSecretFile);
 			free(pixel);
-			
+		
 		}else{
 			printUsage();
 			exit(0);
 		}			
 	}
+	
 	exit(0);
 }
 
@@ -350,7 +352,7 @@ int readStego(RGB *pixel, int width, int bottom){
 // at the bottom left bit, 1 if exists conjugation
 // 0 otherwise
 void set_indicator_to(int x, int bitplane){
-   bitslices[7][0][bitplane];;
+   bitslices[7][0][bitplane] = x;
 }
 
 int readIndicator(int bitplane){
